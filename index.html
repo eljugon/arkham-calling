@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arkham Calling</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=Limelight&display=swap">
+<style>
+/* Layout: dad's secret switchboard styled as a Dark Deco (Batman TAS) asylum intake file
+   + full-screen phone layers that mimic a real iPhone call with a contact-poster portrait */
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+:root{
+  --bg:#0a0c11; --panel:#121620; --line:#252b3a; --fg:#e8eaf0; --muted:#8c93a6;
+  --accent:#f0b23a; --red:#ff3b30; --green:#34c759;
+  --deco:"Limelight","Barlow Condensed",serif;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --call:-apple-system,"SF Pro Display","Helvetica Neue",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,summary:focus-visible,label:focus-within{outline:2px solid var(--accent);outline-offset:3px}
+
+/* ---------- Dad panel ---------- */
+.panel{max-width:560px;margin:0 auto;padding:0 16px 48px;display:flex;flex-direction:column;gap:28px}
+.hero{position:relative;margin:0 -16px;padding:calc(env(safe-area-inset-top,0px) + 28px) 20px 22px;min-height:210px;overflow:hidden;
+  background:linear-gradient(180deg,#e0471f 0%,#a5200f 38%,#4a0a05 72%,var(--bg) 100%);display:flex;flex-direction:column;justify-content:flex-end}
+.hero svg.sky{position:absolute;inset:0;width:100%;height:100%}
+.hero h1{position:relative;font-family:var(--deco);font-weight:400;font-size:2.7rem;margin:0;line-height:.95;letter-spacing:.03em;text-transform:uppercase;color:#f6e7c1;text-shadow:3px 3px 0 #000;text-wrap:balance}
+.hero h1 span{color:var(--accent)}
+.hero p{position:relative;margin:8px 0 0;color:#f3d9c4;font-size:.95rem;max-width:34ch;text-shadow:0 1px 2px #000}
+.step{display:flex;flex-direction:column;gap:12px}
+.step h2{font-family:var(--display);font-weight:600;font-size:1rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0;display:flex;gap:10px;align-items:center}
+.step h2 b{color:var(--bg);background:var(--accent);border-radius:4px;padding:0 7px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (min-width:480px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.card{position:relative;display:flex;flex-direction:column;gap:0;padding:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;text-align:left;min-width:0;overflow:hidden}
+.card .pic{width:100%;aspect-ratio:1;background-size:cover;background-position:center;border-bottom:4px solid var(--vc,var(--accent))}
+.card .txt{padding:9px 10px 11px;display:flex;flex-direction:column;gap:2px}
+.card .cell{font-family:var(--display);font-size:.72rem;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.card .nm{font-family:var(--deco);font-size:1.15rem;line-height:1.05;color:#f6e7c1}
+.card .sub{font-size:.78rem;color:var(--muted)}
+.card[aria-pressed="true"]{border-color:var(--vc,var(--accent));box-shadow:0 0 0 2px var(--vc,var(--accent)),0 8px 24px rgba(0,0,0,.5)}
+.card[aria-pressed="true"]::after{content:"Llamará";position:absolute;top:8px;right:8px;background:var(--vc,var(--accent));color:#000;font-family:var(--display);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:999px}
+.mono{width:56px;height:56px;border-radius:50%;background-size:cover;background-position:center;flex:none;box-shadow:0 0 0 2px var(--vc,var(--line))}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-weight:600;font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.go{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:12px 18px;border:0;border-radius:14px;background:var(--green);color:#04210d;font-family:var(--display);font-weight:700;font-size:1.35rem;letter-spacing:.06em;text-transform:uppercase}
+.go .mono{width:44px;height:44px;box-shadow:0 0 0 2px #04210d}
+.hint{margin:0;color:var(--muted);font-size:.9rem;line-height:1.45}
+.check{margin:0;padding:14px 16px;border:1px dashed var(--line);border-radius:10px;display:flex;flex-direction:column;gap:6px;list-style:none;font-size:.92rem;line-height:1.4}
+.check li::before{content:"☐ ";color:var(--accent)}
+details.dossier{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--vc);border-radius:10px;overflow:hidden}
+details.dossier>summary{list-style:none;display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer}
+details.dossier>summary::-webkit-details-marker{display:none}
+details.dossier>summary .nm{font-family:var(--deco);font-size:1.15rem;color:#f6e7c1;display:block}
+details.dossier>summary .who2{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+details.dossier>summary .tag{font-size:.8rem;color:var(--muted)}
+details.dossier>summary .meta{font-size:.78rem;color:var(--muted);text-align:right}
+.dbody{padding:14px 12px;display:flex;flex-direction:column;gap:14px;border-top:1px solid var(--line)}
+.file-card{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:start}
+.file-card .big{width:120px;aspect-ratio:1;border-radius:8px;background-size:cover;background-position:center;box-shadow:0 0 0 2px var(--vc)}
+.file-card dl{margin:0;display:grid;gap:6px;font-size:.88rem;line-height:1.35}
+.file-card dt{font-family:var(--display);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.file-card dd{margin:0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:#1a1f2b;font-size:.9rem;font-weight:500}
+.btn.small{padding:6px 10px;font-size:.8rem}
+.btn.danger{color:#ff8a82}
+.file{position:relative;overflow:hidden}
+.file input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.clips{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.clips li{display:flex;gap:8px;align-items:center;justify-content:space-between;font-size:.85rem;min-width:0}
+.clips li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.script{border-left:2px solid var(--line);padding-left:12px;display:flex;flex-direction:column;gap:6px}
+.script h4{margin:0;font-size:.95rem;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.script p{margin:0;font-size:.85rem;color:var(--muted);line-height:1.45;user-select:text;-webkit-user-select:text}
+.lab{font-family:var(--display);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+select{background:#1a1f2b;border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:inherit;color:var(--fg);max-width:100%}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#222838;border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-size:.9rem;z-index:50}
+
+/* ---------- Phone layers ---------- */
+.layer{position:fixed;inset:0;z-index:20;font-family:var(--call);color:#fff;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.hot{position:absolute;top:0;left:0;width:90px;height:90px;z-index:5}
+.hotcap{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:14px;font-size:.72rem;color:rgba(255,255,255,.55);max-width:180px;line-height:1.3;transition:opacity 1s}
+
+/* lock screen */
+#lock{background:#000;display:flex;flex-direction:column;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 56px) 16px 0}
+#lock .wall{position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 110%,#1d2433 0%,#06070a 60%,#000 100%)}
+#lock .date{position:relative;font-size:1.25rem;font-weight:500;opacity:.85;text-transform:capitalize}
+#lock .time{position:relative;font-size:clamp(5rem,26vw,7rem);font-weight:600;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.notif{position:relative;margin-top:28px;width:min(100%,380px);background:rgba(60,60,67,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:20px;padding:12px 14px;display:flex;gap:12px;align-items:center}
+.notif .ico{position:relative;width:42px;height:42px;border-radius:50%;background-size:cover;background-position:center;flex:none}
+.notif .ico i{position:absolute;right:-4px;bottom:-4px;width:20px;height:20px;border-radius:6px;background:var(--green);display:grid;place-items:center}
+.notif .ico svg{width:12px;height:12px}
+.notif b{display:block;font-size:.95rem}
+.notif span{font-size:.88rem;opacity:.85}
+
+/* incoming: full-screen contact poster */
+.poster{position:absolute;inset:0;background:linear-gradient(180deg,var(--sky0,#111) 0%,var(--sky0,#111) 55%,#000 100%)}
+.poster img{position:absolute;left:50%;bottom:12vh;transform:translateX(-50%);width:max(100%,70vh);max-width:none;height:auto;display:block}
+.poster img.photo{inset:0;transform:none;width:100%;height:100%;object-fit:cover;object-position:center 25%}
+.poster::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,0) 60%,rgba(0,0,0,.7) 80%,#000 92%)}
+#incoming .poster img{animation:breathe 3.6s ease-in-out infinite alternate}
+@keyframes breathe{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.03)}}
+#incoming .poster img.photo{animation:none}
+.callwrap{position:relative;height:100%;display:flex;flex-direction:column;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 54px) 24px calc(env(safe-area-inset-bottom,0px) + 40px)}
+.who{text-align:center;display:flex;flex-direction:column;gap:6px;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.who .kind{font-size:1rem;opacity:.8}
+.who .name{font-size:2.6rem;font-weight:600;letter-spacing:-.01em;line-height:1.05;text-wrap:balance}
+.who .status{font-size:1.05rem;opacity:.8;font-variant-numeric:tabular-nums}
+.spacer{flex:1}
+.minor{display:flex;justify-content:space-between;width:min(100%,300px);margin-bottom:34px}
+.minor div{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.85rem;opacity:.9}
+.minor svg{width:26px;height:26px}
+.answer{display:flex;justify-content:space-between;width:min(100%,300px)}
+.answer div{display:flex;flex-direction:column;align-items:center;gap:10px;font-size:.95rem}
+.round{width:76px;height:76px;border-radius:50%;border:0;display:grid;place-items:center}
+.round svg{width:34px;height:34px;fill:#fff}
+.round.red{background:var(--red)} .round.red svg{transform:rotate(135deg)}
+.round.green{background:var(--green)}
+#accept{animation:nudge 1.2s ease-in-out infinite}
+@keyframes nudge{0%,70%,100%{transform:translateY(0)}80%{transform:translateY(-6px)}90%{transform:translateY(0)}}
+
+/* in call */
+.callbg{position:absolute;inset:0;background:#000}
+.callbg::before{content:"";position:absolute;inset:-20%;background:var(--grad);filter:blur(60px) saturate(1.2);opacity:.85}
+.callbg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.55))}
+.avatar{margin:auto 0;width:min(46vw,190px);aspect-ratio:1;border-radius:50%;background-size:cover;background-position:center;box-shadow:0 0 0 3px var(--vc,rgba(255,255,255,.2)),0 20px 60px rgba(0,0,0,.5)}
+.keys{display:grid;grid-template-columns:repeat(3,76px);gap:22px 30px;margin:28px 0 40px}
+.key{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:.82rem}
+.key button{width:76px;height:76px;border-radius:50%;border:0;background:rgba(255,255,255,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:grid;place-items:center}
+.key button svg{width:30px;height:30px;fill:#fff}
+.key button[aria-pressed="true"]{background:#fff}
+.key button[aria-pressed="true"] svg{fill:#000}
+@media (max-height:700px){.keys{gap:14px 26px;margin:16px 0 24px}.key button,.round{width:66px;height:66px}.keys{grid-template-columns:repeat(3,66px)}.avatar{width:min(34vw,130px)}}
+@media (prefers-reduced-motion:reduce){#incoming .poster img,#accept{animation:none}}
+</style>
+</head>
+<body>
+
+<!-- ============ DAD PANEL ============ -->
+<main class="panel" id="panel">
+  <header class="hero">
+    <svg class="sky" viewBox="0 0 400 210" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <path d="M150 210 L232 30 L262 34 Z" fill="#fff6c8" opacity=".12"/>
+      <path d="M330 210 L180 18 L205 12 Z" fill="#fff6c8" opacity=".07"/>
+      <ellipse cx="244" cy="40" rx="46" ry="22" fill="#fbe7a0" opacity=".85"/>
+      <path transform="translate(214 27) scale(.6)" fill="#2a0904" d="M50 14 L53 5 L56 14 Q72 6 92 12 Q82 18 84 28 Q72 23 64 31 Q58 27 50 38 Q42 27 36 31 Q28 23 16 28 Q18 18 8 12 Q28 6 44 14 L47 5Z"/>
+      <g fill="#1a0503" opacity=".9">
+        <ellipse cx="78" cy="58" rx="34" ry="9"/><path d="M106 56 l12 -6 v14z"/><rect x="66" y="66" width="16" height="5" rx="2"/>
+      </g>
+      <path fill="#070203" d="M0 210V150h14v-22h8v-16h6v16h8v28h12v-48l7-10 7 10v48h12v-26h16v-36h5v-12h4v12h5v36h14v22h12v-54l9-12 9 12v54h14v-32h18v14h12v-40h7l5-14 5 14h7v40h12v-60h4v-10h6v10h4v60h14v-30h16v-20h6v20h8v30h10v-44l8-8 8 8v44h12v-24h14v86z"/>
+    </svg>
+    <h1>Arkham <span>Calling</span></h1>
+    <p>Centralita secreta de papá. Elige villano, programa la llamada y deja el móvil a la vista.</p>
+  </header>
+
+  <section class="step">
+    <h2><b>1</b> Quién llama</h2>
+    <div class="grid" id="vgrid"></div>
+  </section>
+
+  <section class="step">
+    <h2><b>2</b> Cuándo suena</h2>
+    <div class="chips" id="delays"></div>
+  </section>
+
+  <section class="step">
+    <h2><b>3</b> Preparar</h2>
+    <button class="go" id="arm"><span class="mono" id="armPic"></span><span id="armTxt">Preparar llamada</span></button>
+    <p class="hint">La pantalla pasa a modo bloqueo y el teléfono suena pasado el tiempo elegido. Para volver aquí, mantén pulsada la esquina superior izquierda un segundo.</p>
+    <ul class="check">
+      <li>Quita el modo silencio (interruptor lateral) y sube el volumen.</li>
+      <li>No bloquees el iPhone: la página tiene que seguir abierta.</li>
+      <li>Si cuelgan, el villano vuelve a llamar una vez. Si nadie coge, queda una llamada perdida.</li>
+    </ul>
+  </section>
+
+  <section class="step">
+    <h2>Expedientes: voces y fotos</h2>
+    <p class="hint">Cada villano trae su retrato al estilo de la serie animada. Si prefieres una imagen tuya (por ejemplo, una captura de la serie), súbela en su expediente y la verá la llamada. Sin audios propios, el villano habla con la voz del iPhone; para la voz buena, copia un guion, genéralo en ElevenLabs y sube el MP3.</p>
+    <div class="row"><span class="lab">Voz del iPhone</span><select id="voiceSel" aria-label="Voz del iPhone"></select><button class="btn small" id="testVoice">Probar</button></div>
+    <div id="dossiers" style="display:flex;flex-direction:column;gap:10px"></div>
+  </section>
+</main>
+
+<!-- ============ LOCK SCREEN ============ -->
+<div class="layer" id="lock" hidden>
+  <div class="wall"></div>
+  <div class="date" id="lDate"></div>
+  <div class="time" id="lTime"></div>
+  <div class="notif" id="missed" hidden>
+    <div class="ico" id="missedPic"><i><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></i></div>
+    <div><b id="missedName"></b><span>Llamada perdida · ahora</span></div>
+  </div>
+  <div class="hotcap" id="hotcap"></div>
+  <div class="hot"></div>
+</div>
+
+<!-- ============ INCOMING ============ -->
+<div class="layer" id="incoming" hidden>
+  <div class="poster" id="poster"><img alt="" id="posterImg"></div>
+  <div class="callwrap">
+    <div class="who"><div class="kind">móvil</div><div class="name" data-name></div></div>
+    <div class="spacer"></div>
+    <div class="minor">
+      <div><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm.5-13H11v6l5.2 3.2.8-1.2-4.5-2.7z"/></svg>Recordar</div>
+      <div><svg viewBox="0 0 24 24" fill="#fff"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg>Mensaje</div>
+    </div>
+    <div class="answer">
+      <div><button class="round red" id="decline" aria-label="Rechazar"><svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></button>Rechazar</div>
+      <div><button class="round green" id="accept" aria-label="Aceptar"><svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></button>Aceptar</div>
+    </div>
+  </div>
+  <div class="hot"></div>
+</div>
+
+<!-- ============ IN CALL ============ -->
+<div class="layer" id="incall" hidden>
+  <div class="callbg"></div>
+  <div class="callwrap">
+    <div class="who"><div class="name" data-name></div><div class="status" id="cStatus">00:00</div></div>
+    <div class="avatar" data-avatar></div>
+    <div class="keys">
+      <div class="key"><button data-toggle aria-pressed="false" aria-label="Silenciar"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1a7 7 0 0 0 6-6.9z"/></svg></button>silenciar</div>
+      <div class="key"><button aria-label="Teclado"><svg viewBox="0 0 24 24"><circle cx="6" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="6" cy="11" r="2"/><circle cx="12" cy="11" r="2"/><circle cx="18" cy="11" r="2"/><circle cx="6" cy="17" r="2"/><circle cx="12" cy="17" r="2"/><circle cx="18" cy="17" r="2"/><circle cx="12" cy="22" r="1.6"/></svg></button>teclado</div>
+      <div class="key"><button data-toggle aria-pressed="true" aria-label="Altavoz"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg></button>altavoz</div>
+      <div class="key"><button aria-label="Añadir"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg></button>añadir</div>
+      <div class="key"><button aria-label="Vídeo"><svg viewBox="0 0 24 24"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z"/></svg></button>vídeo</div>
+      <div class="key"><button aria-label="Contactos"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4z"/></svg></button>contactos</div>
+    </div>
+    <button class="round red" id="hangup" aria-label="Colgar"><svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></button>
+  </div>
+  <div class="hot"></div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ================= RETRATOS =================
+   Ilustraciones vectoriales propias inspiradas en el estilo "Dark Deco" de
+   Batman: The Animated Series (cielos rojos, siluetas de Gotham, sombras planas).
+   Todas usan un lienzo 200x200; el cielo va de sky[0] (arriba) a sky[1] (abajo). */
+const INK='#0c0b10';
+const SKYLINE='<path fill="#000" opacity=".38" d="M0 200V150H12V128H20V116H26V128H34V152H44V112L50 104L56 112V152H66V130H80V100H84V90H88V100H92V130H104V150H114V104L122 94L130 104V150H142V122H158V134H168V100H174L178 88L182 100H188V134H200V200Z"/>';
+const BEAMS='<path d="M38 200L72 0H88Z" fill="#fff" opacity=".07"/><path d="M168 200L118 0H132Z" fill="#fff" opacity=".05"/>';
+const S=(w=2.5)=>`stroke="${INK}" stroke-width="${w}" stroke-linejoin="round"`;
+
+const ART = {
+joker:()=>`
+<path d="M22 200L40 162Q100 140 160 162L178 200Z" fill="#6b2d94" ${S()}/>
+<path d="M78 156L94 198L70 170Z M122 156L106 198L130 170Z" fill="#4c1d6b"/>
+<path d="M80 156L100 200L120 156Q100 150 80 156Z" fill="#3fa34d" ${S(2)}/>
+<path d="M90 156L100 178L110 156Z" fill="#f2a516" ${S(1.5)}/>
+<path d="M88 132V158H112V132Z" fill="#ece6d6" ${S(2)}/>
+<path d="M68 72Q68 40 100 36Q132 40 132 72L130 108Q124 140 100 146Q76 140 70 108Z" fill="#f6f2e8" ${S()}/>
+<path d="M100 36Q132 40 132 72L130 108Q124 140 100 146Q118 128 120 100Q122 62 100 36Z" fill="#7a6aa8" opacity=".25"/>
+<path d="M64 84Q54 44 84 30Q112 16 138 36Q148 58 136 86Q132 60 118 52Q100 46 84 52Q70 62 64 84Z" fill="#2f9e44" ${S()}/>
+<path d="M84 40Q100 30 122 38M80 48Q98 38 126 46" fill="none" stroke="#1d6b2c" stroke-width="2"/>
+<path d="M76 76L95 84L95 79L78 71Z M124 76L105 84L105 79L122 71Z" fill="${INK}"/>
+<path d="M80 87Q87 82 95 88Q87 92 80 87Z M120 87Q113 82 105 88Q113 92 120 87Z" fill="${INK}"/>
+<path d="M100 84L106 104L98 105" fill="none" ${S(2)}/>
+<path d="M68 104Q100 142 132 104Q100 122 68 104Z" fill="#c4122f" ${S()}/>
+<path d="M77 109Q100 134 123 109Q100 121 77 109Z" fill="#fff"/>
+<path d="M86 114V123M93 117V127M100 118V129M107 117V127M114 114V123" stroke="${INK}" stroke-width="1"/>
+<path d="M66 100Q62 106 67 112M134 100Q138 106 133 112" fill="none" ${S(2)}/>`,
+
+penguin:()=>`
+<path d="M12 200Q20 150 100 146Q180 150 188 200Z" fill="#17171d" ${S()}/>
+<path d="M60 156Q70 180 66 200M140 156Q130 180 134 200" fill="none" stroke="#33333d" stroke-width="3"/>
+<path d="M84 148L100 200L116 148Z" fill="#f2f0ea"/>
+<path d="M86 150L100 157L114 150V163L100 158L86 163Z" fill="#6b3d8f" ${S(1.5)}/>
+<ellipse cx="100" cy="106" rx="38" ry="40" fill="#efcfae" ${S()}/>
+<path d="M100 66A38 40 0 0 1 100 146Q124 122 122 100Q120 78 100 66Z" fill="#a06a4a" opacity=".22"/>
+<path d="M62 102Q60 86 70 78L74 106Z M138 102Q140 86 130 78L126 106Z" fill="#1a1a1a"/>
+<ellipse cx="100" cy="74" rx="52" ry="8" fill="#111116" ${S(2)}/>
+<path d="M68 74L71 24Q100 18 129 24L132 74Z" fill="#17171d" ${S()}/>
+<path d="M69 60H131L132 72H68Z" fill="#6b3d8f"/>
+<path d="M80 28V58" stroke="#fff" opacity=".15" stroke-width="5"/>
+<path d="M75 87L94 94M125 87L107 94" stroke="${INK}" stroke-width="4.5" stroke-linecap="round"/>
+<circle cx="86" cy="99" r="3.2" fill="${INK}"/><circle cx="115" cy="99" r="3.2" fill="${INK}"/>
+<circle cx="115" cy="99" r="10" fill="#cfe7ff" fill-opacity=".25" stroke="#d9b54a" stroke-width="2.5"/>
+<path d="M124 105Q136 128 128 150" fill="none" stroke="#d9b54a" stroke-width="1.5"/>
+<path d="M95 100Q128 106 150 130Q122 124 95 117Z" fill="#e8b38c" ${S()}/>
+<path d="M82 129Q98 138 114 129" fill="none" ${S(2.5)}/>
+<path d="M110 132L152 121" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="153" cy="120.5" r="2.8" fill="#ff7a1a"/>
+<path d="M156 116Q150 106 158 98Q166 90 160 80" fill="none" stroke="#fff" opacity=".35" stroke-width="2"/>`,
+
+twoface:()=>`
+<path d="M22 200L40 160Q70 150 100 148V200Z" fill="#ece8dc" ${S()}/>
+<path d="M178 200L160 160Q130 150 100 148V200Z" fill="#141416" ${S()}/>
+<path d="M88 150L100 200L112 150Z" fill="#fff" ${S(1.5)}/>
+<path d="M96 152H100V198L94 190Z" fill="#141416"/><path d="M100 152H104L106 190L100 198Z" fill="#ece8dc" ${S(1)}/>
+<path d="M88 130V152H112V130Z" fill="#c9a98c" ${S(2)}/>
+<g clip-path="url(#L)">
+ <path d="M70 74Q70 42 100 38Q130 42 130 74L128 110Q122 140 100 146Q78 140 72 110Z" fill="#ebc8a5" ${S()}/>
+ <path d="M66 82Q62 38 104 32L104 52Q80 50 72 84Z" fill="#4a3222" ${S(2)}/>
+ <path d="M77 82L95 80" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
+ <path d="M80 90Q87 86 94 90Q87 94 80 90Z" fill="#fff" ${S(1.5)}/><circle cx="87" cy="90" r="2.4" fill="${INK}"/>
+ <path d="M84 122Q92 124 100 122" fill="none" ${S(2)}/>
+</g>
+<g clip-path="url(#R)">
+ <path d="M70 74Q70 42 100 38Q130 42 130 74L128 110Q122 140 100 146Q78 140 72 110Z" fill="#8a7bb0" ${S()}/>
+ <path d="M104 60L114 66M108 104L120 98M112 128L124 120M118 74L126 80" stroke="#4d3f78" stroke-width="2"/>
+ <path d="M96 34Q136 34 140 82L132 70L130 80L124 62L118 66L114 52L106 56Z" fill="#d9d9df" ${S(2)}/>
+ <path d="M104 76L112 72L118 80L126 74" fill="none" ${S(3)}/>
+ <circle cx="114" cy="90" r="8" fill="#f4e04a" ${S(2)}/><circle cx="114" cy="90" r="2.2" fill="#c4122f"/>
+ <path d="M98 116Q112 112 124 118L122 126Q110 130 98 128Z" fill="#5a1220" ${S(2)}/>
+ <path d="M100 118H122M104 117V128M109 116V129M114 116V129M119 117V127" stroke="#fff" stroke-width="1.5"/>
+</g>
+<circle cx="164" cy="56" r="12" fill="#e8c14a" ${S(2)}/><circle cx="164" cy="56" r="7" fill="none" stroke="#a8862a" stroke-width="2"/>
+<path d="M178 40L180 46L186 48L180 50L178 56L176 50L170 48L176 46Z" fill="#fff6c8"/>`,
+
+ivy:()=>`
+<path d="M48 156Q30 104 52 62Q74 26 106 28Q146 32 156 72Q168 114 152 156Q140 132 134 112H66Q60 134 48 156Z" fill="#c0362c" ${S()}/>
+<path d="M30 200L44 166Q100 146 156 166L170 200Z" fill="#f0d2bb" ${S()}/>
+<path d="M60 200Q66 168 100 178Q134 168 140 200Z" fill="#2e8b3e" ${S(2)}/>
+<path d="M100 178L100 200M84 182Q92 190 100 188M116 182Q108 190 100 188" fill="none" stroke="#1d5c28" stroke-width="1.5"/>
+<path d="M44 170Q58 148 80 160Q64 180 44 170Z M156 170Q142 148 120 160Q136 180 156 170Z" fill="#3aa04d" ${S(1.5)}/>
+<path d="M90 130V158H110V130Z" fill="#ecc9b0" ${S(2)}/>
+<path d="M74 80Q74 50 100 48Q126 50 126 80L124 108Q118 136 100 140Q82 136 76 108Z" fill="#f2d7c2" ${S()}/>
+<path d="M68 96Q62 48 100 42Q138 48 132 96Q124 66 110 60Q98 72 80 70Q72 80 68 96Z" fill="#c0362c" ${S()}/>
+<path d="M80 52Q90 46 104 48M110 50Q124 54 128 70" fill="none" stroke="#8a2018" stroke-width="2"/>
+<path d="M80 84Q88 80 96 84M104 84Q112 80 120 84" fill="none" ${S(1.8)}/>
+<path d="M81 93Q89 86 96 93Q89 97 81 93Z M119 93Q111 86 104 93Q111 97 119 93Z" fill="#22a046" ${S(1.5)}/>
+<circle cx="89" cy="92.5" r="1.8" fill="${INK}"/><circle cx="111" cy="92.5" r="1.8" fill="${INK}"/>
+<path d="M100 96L103 110L98 111" fill="none" ${S(1.5)}/>
+<path d="M89 120Q100 113 111 120Q100 128 89 120Z" fill="#c0122f" ${S(1.5)}/>
+<path d="M62 64Q72 52 86 58Q74 72 62 64Z M138 76Q130 62 116 66Q126 82 138 76Z" fill="#3aa04d" ${S(1.5)}/>
+<path d="M0 150Q20 140 22 120Q24 100 12 90M200 150Q180 140 178 120Q176 100 188 90" fill="none" stroke="#2e8b3e" stroke-width="3"/>
+<path d="M14 122Q4 112 12 104Q22 112 14 122Z M186 122Q196 112 188 104Q178 112 186 122Z M8 146Q0 136 10 132Q16 142 8 146Z M192 146Q200 136 190 132Q184 142 192 146Z" fill="#3aa04d"/>`,
+
+riddler:()=>`
+<path d="M22 200L40 162Q100 142 160 162L178 200Z" fill="#2d9a45" ${S()}/>
+<path d="M78 156L94 198L68 170Z M122 156L106 198L132 170Z" fill="#1f7333"/>
+<path d="M84 154L100 200L116 154Z" fill="#f4f1e8" ${S(1.5)}/>
+<path d="M95 158H105L108 190L100 198L92 190Z" fill="#5b2a86" ${S(1.5)}/>
+<text x="100" y="186" text-anchor="middle" font-family="Georgia,serif" font-weight="bold" font-size="16" fill="#f6e7c1">?</text>
+<path d="M88 132V156H112V132Z" fill="#e6c09a" ${S(2)}/>
+<path d="M70 74Q70 46 100 44Q130 46 130 74L128 106Q122 138 100 144Q78 138 72 106Z" fill="#efcda8" ${S()}/>
+<path d="M100 44Q130 46 130 74L128 106Q122 138 100 144Q118 126 120 100Q122 66 100 44Z" fill="#a06a4a" opacity=".2"/>
+<path d="M68 80Q64 70 72 64L76 84Z M132 80Q136 70 128 64L124 84Z" fill="#c8561e"/>
+<path d="M72 84Q86 76 100 84Q114 76 128 84L126 97Q112 101 100 93Q88 101 74 97Z" fill="#5b2a86" ${S(2)}/>
+<path d="M80 89Q87 85 94 89Q87 93 80 89Z M120 89Q113 85 106 89Q113 93 120 89Z" fill="#fff"/>
+<circle cx="88" cy="89" r="2.2" fill="${INK}"/><circle cx="112" cy="89" r="2.2" fill="${INK}"/>
+<path d="M76 80L94 82M124 78L106 82" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+<path d="M100 96L105 110L98 111" fill="none" ${S(2)}/>
+<path d="M84 120Q102 130 120 112" fill="none" ${S(2.5)}/><path d="M118 110L122 114" ${S(2)}/>
+<ellipse cx="100" cy="68" rx="46" ry="7" fill="#24803a" ${S(2)}/>
+<path d="M70 68Q70 30 100 28Q130 30 130 68Z" fill="#2d9a45" ${S()}/>
+<path d="M71 58H129L130 66H70Z" fill="#5b2a86"/>
+<path d="M82 34Q84 46 82 56" stroke="#fff" opacity=".18" stroke-width="5"/>`,
+
+freeze:()=>`
+<path d="M18 200L34 160Q100 138 166 160L182 200Z" fill="#a9b6c2" ${S()}/>
+<path d="M50 168L60 200M150 168L140 200M70 158V200M130 158V200" stroke="#6f7d8a" stroke-width="2"/>
+<circle cx="100" cy="178" r="10" fill="#7fd3ff" ${S(2)}/><circle cx="100" cy="178" r="5" fill="#e8fbff"/>
+<ellipse cx="100" cy="150" rx="46" ry="10" fill="#7d8b98" ${S(2)}/>
+<path d="M88 128V148H112V128Z" fill="#bcdbe6" ${S(2)}/>
+<path d="M72 76Q72 46 100 44Q128 46 128 76L126 110Q118 138 100 142Q82 138 74 110Z" fill="#d7eef7" ${S()}/>
+<path d="M100 44Q128 46 128 76L126 110Q118 138 100 142Q116 124 118 100Q120 64 100 44Z" fill="#4a7f99" opacity=".25"/>
+<path d="M76 76L94 80M124 76L106 80" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>
+<rect x="68" y="81" width="64" height="14" rx="5" fill="#2b2f36" ${S(1.5)}/>
+<circle cx="87" cy="88" r="9" fill="#e1342b" ${S(2)}/><circle cx="113" cy="88" r="9" fill="#e1342b" ${S(2)}/>
+<circle cx="84" cy="85" r="2.5" fill="#ffd0c8"/><circle cx="110" cy="85" r="2.5" fill="#ffd0c8"/>
+<path d="M100 98L104 112L98 113" fill="none" ${S(2)}/>
+<path d="M88 124Q100 117 112 124" fill="none" ${S(2.5)}/>
+<circle cx="100" cy="92" r="58" fill="#bfe9ff" fill-opacity=".13" stroke="#e8f8ff" stroke-opacity=".75" stroke-width="2.5"/>
+<path d="M60 72Q68 46 96 38" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="4" stroke-linecap="round"/>
+<g stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".8">
+ <path d="M24 40v14M17 47h14M19 42l10 10M29 42L19 52"/><path d="M176 30v10M171 35h10M172.5 31.5l7 7M179.5 31.5l-7 7"/><path d="M180 100v8M176 104h8"/><path d="M16 110v8M12 114h8"/>
+</g>`,
+
+surprise:()=>`
+<text x="100" y="118" text-anchor="middle" font-family="Georgia,serif" font-weight="bold" font-size="150" fill="#f0b23a" opacity=".22">?</text>
+<path d="M22 200L40 160Q100 140 160 160L178 200Z" fill="#0b0b0f"/>
+<path d="M86 130V156H114V130Z" fill="#0b0b0f"/>
+<path d="M70 82Q70 52 100 50Q130 52 130 82L128 110Q122 138 100 142Q78 138 72 110Z" fill="#0b0b0f"/>
+<ellipse cx="100" cy="64" rx="56" ry="9" fill="#0b0b0f"/>
+<path d="M70 64Q70 28 100 26Q130 28 130 64Z" fill="#0b0b0f"/>
+<path d="M80 90L95 94L82 96Z M120 90L105 94L118 96Z" fill="#fff6c8"/>`
+};
+
+function artSVG(v){
+  const defs = v.id==='twoface' ? '<clipPath id="L"><path d="M0 0H100L97 60L103 80L98 100L103 120L100 146V200H0Z"/></clipPath><clipPath id="R"><path d="M200 0H100L97 60L103 80L98 100L103 120L100 146V200H200Z"/></clipPath>' : '';
+  const backdrop = v.backdrop || '';
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${v.sky[0]}"/><stop offset="1" stop-color="${v.sky[1]}"/></linearGradient>${defs}</defs><rect width="200" height="200" fill="url(#bg)"/>${backdrop}${BEAMS}${SKYLINE}${ART[v.id]()}</svg>`;
+}
+const artCache = {};
+function artUrl(v){ return artCache[v.id] || (artCache[v.id] = 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(artSVG(v))); }
+
+/* ================= GUIONES =================
+   Cada línea es texto o {t, p (tono 0–2), r (velocidad)}.
+   Todas terminan igual: las niñas hacen caso a papá y el villano huye. */
+const VILLAINS = [
+ {id:'joker', name:'Joker', cell:'Celda A-01', color:'#3fa34d', sky:['#4a1a66','#14081c'],
+  tag:'El payaso bromista', bio:'Pelo verde, sonrisa enorme y traje morado. Siempre se está riendo.', fear:'Que las niñas hagan caso a papá: se le rompen las bromas.',
+  grad:'radial-gradient(60% 50% at 30% 30%,#6b2fa3,transparent),radial-gradient(60% 50% at 75% 75%,#1e8a45,transparent),#120a1c', voice:{p:1.55,r:1.08}, scripts:[
+  {title:'La broma pegajosa', lines:[
+   'Ja, ja, ja, ja, ja... ¿Hola? ¿Hola? ¿Son las niñas? ¡Qué suerte!',
+   'Soy yo... el Joker. Os llamo desde un escondite secreto de Gotham.',
+   'Estoy preparando una broma enorme. Una broma muy... pegajosa. Ji, ji, ji.',
+   'Pero tengo un problema. Batman me ha contado un secreto.',
+   'Dice que las niñas que escuchan a su papá tienen un superpoder. ¡Un superpoder que rompe todas mis bromas!',
+   'Eso no será verdad... ¿no? ¿No?',
+   'A ver... si ahora mismo hacéis caso a papá... ¡Ay! ¡Ay, no! ¡Noto cómo mi broma se deshace!',
+   '¡Me voy antes de que llegue Batman! ¡Ja, ja... ja... adiós!']},
+  {title:'Nadie se va a la cama', lines:[
+   'Ja, ja, ja... ¿Todavía estáis despiertas? ¡Perfecto! Me encantan las niñas que no se van a dormir.',
+   'Porque así la noche es más larga, más oscura... y más divertida para mí.',
+   'Pero, shhh... tengo miedo de una cosa.',
+   'Si escucháis a papá y os vais a la cama, Batman vigila vuestra casa toda la noche.',
+   'Y si Batman vigila... ¡yo no me puedo acercar! ¡Qué rabia!',
+   'Venga, desobedeced un poquito, ¿sí? ... ¿No? ¿Vais a hacer caso a papá?',
+   '¡Oh, qué niñas tan valientes! ¡Me rindo! ¡Ja, ja... grrr!']},
+  {title:'El juego de la risa', lines:[
+   'Ja, ja, ja... Hola, pequeñas. ¿Sabéis jugar a mi juego?',
+   'Se llama: no escuches a papá. Gana quien hace más travesuras.',
+   'Ji, ji... yo siempre gano.',
+   'Un momento... ¿qué oigo? ¿Que en esta casa las niñas escuchan a papá a la primera?',
+   '¡Eso no vale! ¡Así pierdo yo!',
+   'Me voy a buscar otra casa. ¡Esta tiene demasiadas niñas buenas! ¡Ja, ja... ay!']}
+ ]},
+ {id:'penguin', name:'Pingüino', cell:'Celda B-07', color:'#8fa6c9', sky:['#34465f','#0b111c'],
+  tag:'El caballero del paraguas', bio:'Sombrero de copa, monóculo y nariz de pico. Vive bajo el hielo con sus pingüinos.', fear:'Las niñas que se comen la cena se hacen fuertes como Batman.',
+  grad:'radial-gradient(60% 50% at 30% 25%,#3a4a6b,transparent),radial-gradient(50% 40% at 70% 80%,#7a1f2b,transparent),#0b0e16', voice:{p:0.7,r:0.9}, scripts:[
+  {title:'Mis pingüinos vigilan', lines:[
+   'Cuac, cuac... ¿Diga? Aquí el Pingüino. Os llamo desde mi guarida, debajo del hielo.',
+   'Mis pingüinos me han contado que en esta casa viven unas niñas muy especiales.',
+   'Dicen que cuando papá habla... ellas escuchan con las orejas bien abiertas.',
+   '¿Es verdad eso? Porque si es verdad... ¡todos mis planes se estropean! ¡Cuac!',
+   'A ver, demostradlo. Cuando cuelgue, haced exactamente lo que os diga papá.',
+   'Mis pingüinos estarán mirando por la ventana... Cuac, cuac. Adiós.']},
+  {title:'La cena robada', lines:[
+   'Cuac... Hola, niñas. Soy el Pingüino.',
+   'Tengo mucha hambre. Muchísima. Y he visto que tenéis la cena en la mesa.',
+   'Si no os la coméis... ¡me la llevo yo a mi guarida! Cuac, cuac.',
+   'Pero cuidado. Las niñas que escuchan a papá y se comen la cena se hacen fuertes. Fuertes como Batman.',
+   'Y yo a Batman... le tengo un poquito de miedo.',
+   '¡Rápido, a comer! ¡Que yo me escondo! ¡Cuac!']}
+ ]},
+ {id:'twoface', name:'Dos Caras', cell:'Celda C-02', color:'#e8c14a', sky:['#2a4d8a','#0b1426'],
+  backdrop:'<path d="M100 0H200V200H100Z" fill="#8a1c1c"/><path d="M100 0H200V200H100Z" fill="#000" opacity=".15"/>',
+  tag:'El de la moneda', bio:'Media cara buena y media cara mala. Lo decide todo lanzando una moneda.', fear:'Si las niñas hacen caso a papá, la moneda siempre sale cara.',
+  grad:'linear-gradient(90deg,#3b4252 0%,#3b4252 49%,#5a1c1c 51%,#5a1c1c 100%)', voice:{p:1,r:0.95}, scripts:[
+  {title:'La moneda', lines:[
+   {t:'Hola, niñas. Soy Dos Caras.',p:1.1},
+   {t:'¡Y yo también! ¡Ja!',p:0.45,r:0.85},
+   {t:'Tengo una moneda. Si sale cara, os dejo en paz.',p:1.1},
+   {t:'Y si sale cruz... ¡hago una travesura gigante en vuestra casa!',p:0.45,r:0.85},
+   {t:'Voy a lanzarla... tres... dos...',p:1.1},
+   {t:'¡Espera! La moneda tiene una regla.',p:0.45,r:0.85},
+   {t:'Si las niñas hacen caso a papá, siempre sale cara.',p:1.1},
+   {t:'Grrr... Pues vamos a ver qué hacéis. ¡Estamos mirando!',p:0.45,r:0.85}]},
+  {title:'Las dos voces', lines:[
+   {t:'¿Me oís? Soy la voz buena de Dos Caras.',p:1.15},
+   {t:'¡Y yo soy la voz mala! ¡No escuchéis a papá!',p:0.45,r:0.85},
+   {t:'Sí, sí, escuchad a papá. Es lo más valiente.',p:1.15},
+   {t:'¡No! ¡Haced travesuras!',p:0.45,r:0.85},
+   {t:'Niñas, vosotras decidís. ¿Vais a escuchar a papá?',p:1.15},
+   {t:'... ¿Sí? ¡Noooo! ¡Ha ganado la voz buena! ¡Me voy!',p:0.45,r:0.85}]}
+ ]},
+ {id:'ivy', name:'Hiedra Venenosa', cell:'Celda D-04', color:'#c0362c', sky:['#1d5a34','#06150c'],
+  tag:'La reina de las plantas', bio:'Pelo rojo, ojos verdes y un vestido de hojas. Sus enredaderas trepan por las paredes.', fear:'Sus plantas se secan cerca de niñas que escuchan a papá.',
+  grad:'radial-gradient(60% 50% at 25% 30%,#1f6b3a,transparent),radial-gradient(50% 45% at 75% 75%,#8a2a2a,transparent),#07130b', voice:{p:1.25,r:0.82}, scripts:[
+  {title:'Las enredaderas', lines:[
+   'Hola, pequeñas... Soy Hiedra Venenosa.',
+   'Mis plantas están creciendo por toda la ciudad. Despacio... muy despacio...',
+   'Ramas... hojas... enredaderas... subiendo por las paredes. Hacia vuestra ventana.',
+   'Pero las plantas tienen un secreto que nadie sabe.',
+   'No pueden crecer cerca de niñas que escuchan a su papá.',
+   'Así que... ¿vais a escuchar a papá?',
+   'Oh, no... mis enredaderas se están secando... ¡Volveré!']},
+  {title:'El jardín de la noche', lines:[
+   'Shhh... ¿Oís eso? Son mis flores. Se abren por la noche.',
+   'Y les encantan las niñas que no quieren irse a dormir.',
+   'Pero si os ponéis el pijama cuando papá os lo dice...',
+   'mis flores se cierran, se duermen... y no pueden hacer nada.',
+   'Venga, intentadlo. A ver si es verdad...',
+   '¡Ay! Se están cerrando todas. ¡Qué niñas tan listas! Me voy...']}
+ ]},
+ {id:'riddler', name:'Acertijo', cell:'Celda E-11', color:'#9b5fd6', sky:['#13403a','#051512'],
+  backdrop:'<g font-family="Georgia,serif" font-weight="bold" fill="#3fd06a" opacity=".22"><text x="18" y="60" font-size="44">?</text><text x="160" y="50" font-size="34">?</text><text x="150" y="128" font-size="52">?</text><text x="10" y="140" font-size="30">?</text></g>',
+  tag:'El de los acertijos', bio:'Traje verde, bombín y antifaz morado. Lo llena todo de signos de interrogación.', fear:'Que las niñas acierten sus preguntas: siempre la respuesta es “papá”.',
+  grad:'radial-gradient(60% 50% at 30% 30%,#2d7a2d,transparent),radial-gradient(50% 45% at 75% 75%,#3b2a6b,transparent),#0a120a', voice:{p:1.15,r:1.12}, scripts:[
+  {title:'Tres acertijos', lines:[
+   'Atención, atención. Aquí Acertijo. Nadie resuelve mis acertijos. ¡Nadie!',
+   'Primer acertijo. Es grande, da abrazos enormes y os lee cuentos. ¿Quién es?',
+   '... ¡Papá! Bah, era demasiado fácil.',
+   'Segundo acertijo. ¿Qué hacen las niñas valientes cuando papá les habla?',
+   '... ¿Le escuchan? ¡Imposible! ¿Cómo lo habéis sabido?',
+   'Último acertijo. Si las niñas hacen caso a papá... ¿quién pierde?',
+   '... ¡Yo! ¡Pierdo yo! ¡Noooo! ¡Esto no se queda así!']},
+  {title:'La pregunta misteriosa', lines:[
+   'Hola, hola. Soy Acertijo y tengo una pregunta misteriosa.',
+   'Batman la sabe. Yo no. Y me pone muy, muy nervioso.',
+   'La pregunta es: ¿hay en esta casa unas niñas que escuchan a papá?',
+   'Si es que sí, decidlo muy fuerte. ¡Sí!',
+   '¡Ay! ¡Qué fuerte lo habéis dicho! ¡Me tapo las orejas!',
+   'Vale, vale, me rindo. Me voy a pensar otro acertijo.']}
+ ]},
+ {id:'freeze', name:'Mr. Frío', cell:'Celda F-00', color:'#7fd3ff', sky:['#245f86','#061827'],
+  tag:'El hombre de hielo', bio:'Cabeza dentro de una cúpula de cristal y gafas rojas. Todo lo que toca se congela.', fear:'El calor de una familia que se escucha derrite su hielo.',
+  grad:'radial-gradient(60% 50% at 30% 30%,#2a6f9a,transparent),radial-gradient(50% 45% at 70% 80%,#a9dcf2,transparent),#06121b', voice:{p:0.4,r:0.75}, scripts:[
+  {title:'El rayo congelador', lines:[
+   'Hace... frío... ¿lo notáis? Soy Mister Frío.',
+   'Quiero congelar Gotham entera. Las calles, los parques...',
+   'y empezar por vuestra casa.',
+   'Pero el hielo tiene un enemigo. El calor de una familia que se escucha.',
+   'Si hacéis caso a papá ahora mismo... mi rayo congelador... no funcionará.',
+   '¿Lo vais a hacer? ... Noooo... mi hielo... se derrite...']},
+  {title:'Las manos calentitas', lines:[
+   'Brrr... Hola, niñas. Os habla Mister Frío.',
+   'Estoy mirando por la ventana y veo que tenéis las manos calentitas.',
+   'Eso no me gusta nada.',
+   'Las manos se ponen calentitas cuando ayudáis a papá a recoger los juguetes.',
+   'Así que, por favor... no recojáis nada. Nada de nada.',
+   '¿Qué? ¿Ya estáis recogiendo? ¡No! ¡Hace demasiado calor aquí! ¡Me voy!']}
+ ]}
+];
+const SURPRISE = {id:'surprise', name:'Sorpresa', cell:'Celda ?', color:'#f0b23a', sky:['#b5301a','#2a0704'], sub:'Al azar'};
+const DELAYS = [5,20,60,180];
+
+/* ================= storage helpers ================= */
+const LS = {get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}}, set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const mem = new Map();
+const DB = {
+  db:null,
+  open(){ if(this.p) return this.p; this.p = new Promise(res=>{ try{ const r=indexedDB.open('arkham-calling',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>{this.db=r.result;res()}; r.onerror=()=>res(); }catch(e){res()} }); return this.p; },
+  async get(k){ await this.open(); if(!this.db) return mem.get(k); return new Promise(res=>{ try{ const q=this.db.transaction('kv').objectStore('kv').get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>res(mem.get(k)); }catch(e){res(mem.get(k))} }); },
+  async set(k,v){ mem.set(k,v); await this.open(); if(!this.db) return; return new Promise(res=>{ try{ const t=this.db.transaction('kv','readwrite'); t.objectStore('kv').put(v,k); t.oncomplete=res; t.onerror=res; }catch(e){res()} }); }
+};
+
+/* ================= state ================= */
+const $ = s=>document.querySelector(s);
+let sel = LS.get('ac.sel','joker');
+let delay = LS.get('ac.delay',20);
+let voiceName = LS.get('ac.voice','');
+const photoUrl = {};
+let current=null, calledBack=false, timers=[], callToken=null, wakeLock=null, clipEl=null;
+
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast.h); toast.h=setTimeout(()=>t.hidden=true,2600); }
+function later(fn,ms){ const id=setTimeout(fn,ms); timers.push(id); return id; }
+function clearTimers(){ timers.forEach(clearTimeout); timers=[]; }
+const sleep = ms=>new Promise(r=>setTimeout(r,ms));
+
+/* ================= panel rendering ================= */
+function picUrl(v){ return photoUrl[v.id] || artUrl(v); }
+function picStyle(v){ return `background-image:url("${picUrl(v)}");--vc:${v.color}`; }
+function selected(){ return sel==='surprise' ? SURPRISE : VILLAINS.find(v=>v.id===sel) || VILLAINS[0]; }
+function renderGrid(){
+  const g=$('#vgrid'); g.innerHTML='';
+  [...VILLAINS,SURPRISE].forEach(v=>{
+    const b=document.createElement('button'); b.className='card'; b.setAttribute('aria-pressed',String(sel===v.id)); b.style.setProperty('--vc',v.color);
+    b.innerHTML=`<div class="pic" style='${picStyle(v)}'></div><div class="txt"><div class="cell">${v.cell}</div><div class="nm">${v.name}</div><div class="sub">${v.sub||v.tag}</div></div>`;
+    b.onclick=()=>{sel=v.id;LS.set('ac.sel',sel);renderGrid();};
+    g.appendChild(b);
+  });
+  const s=selected();
+  $('#armPic').setAttribute('style',picStyle(s));
+  $('#armTxt').textContent = s.id==='surprise' ? 'Preparar llamada sorpresa' : `Preparar llamada de ${s.name}`;
+}
+function renderDelays(){
+  const c=$('#delays'); c.innerHTML='';
+  DELAYS.forEach(s=>{ const b=document.createElement('button'); b.className='chip'; b.setAttribute('aria-pressed',String(delay===s)); b.textContent=s<60?`${s} s`:`${s/60} min`; b.onclick=()=>{delay=s;LS.set('ac.delay',s);renderDelays();}; c.appendChild(b); });
+}
+async function renderDossiers(){
+  const box=$('#dossiers'); const open=new Set([...box.querySelectorAll('details[open]')].map(d=>d.dataset.id)); box.innerHTML='';
+  for(const v of VILLAINS){
+    const clips=(await DB.get('audio:'+v.id))||[];
+    const d=document.createElement('details'); d.className='dossier'; d.dataset.id=v.id; d.style.setProperty('--vc',v.color); if(open.has(v.id)) d.open=true;
+    d.innerHTML=`<summary><div class="mono" style='${picStyle(v)}'></div><span class="who2"><span class="nm">${v.name}</span><span class="tag">${v.tag}</span></span><span class="meta">${clips.length?clips.length+' audio'+(clips.length>1?'s':''):'voz del iPhone'}</span></summary>
+    <div class="dbody">
+      <div class="file-card"><div class="big" style='${picStyle(v)}'></div>
+        <dl><div><dt>${v.cell}</dt><dd>${v.bio}</dd></div><div><dt>Le da miedo</dt><dd>${v.fear}</dd></div></dl></div>
+      <div class="row"><span class="lab">Foto</span>
+        <span class="btn small file">${photoUrl[v.id]?'Cambiar foto':'Usar foto propia'}<input type="file" accept="image/*" id="ph-${v.id}"></span>
+        ${photoUrl[v.id]?`<button class="btn small danger" data-delphoto>Volver al retrato</button>`:''}</div>
+      <div style="display:flex;flex-direction:column;gap:8px"><div class="row"><span class="lab">Audios</span>
+        <span class="btn small file">Subir MP3<input type="file" accept="audio/*" multiple id="au-${v.id}"></span></div>
+        <ul class="clips">${clips.map((c,i)=>`<li><span>${c.name}</span><button class="btn small danger" data-delclip="${i}">Quitar</button></li>`).join('')}</ul></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span class="lab">Guiones</span>
+        ${v.scripts.map((s,i)=>`<div class="script"><h4>${s.title}<button class="btn small" data-copy="${i}">Copiar</button></h4><p>${scriptText(s)}</p></div>`).join('')}</div>
+    </div>`;
+    box.appendChild(d);
+    d.querySelector('#ph-'+v.id).onchange=async e=>{ const f=e.target.files[0]; if(!f) return; await DB.set('photo:'+v.id,f); photoUrl[v.id]=URL.createObjectURL(f); renderGrid(); await renderDossiers(); toast('Foto guardada'); };
+    d.querySelector('#au-'+v.id).onchange=async e=>{ const fs=[...e.target.files]; if(!fs.length) return; const list=((await DB.get('audio:'+v.id))||[]).concat(fs.map(f=>({name:f.name,blob:f}))); await DB.set('audio:'+v.id,list); await renderDossiers(); toast(`${fs.length} audio${fs.length>1?'s':''} guardado${fs.length>1?'s':''}`); };
+    const dp=d.querySelector('[data-delphoto]'); if(dp) dp.onclick=async()=>{ await DB.set('photo:'+v.id,null); delete photoUrl[v.id]; renderGrid(); await renderDossiers(); };
+    d.querySelectorAll('[data-delclip]').forEach(b=>b.onclick=async()=>{ const list=(await DB.get('audio:'+v.id))||[]; list.splice(+b.dataset.delclip,1); await DB.set('audio:'+v.id,list); await renderDossiers(); });
+    d.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{ const txt=scriptText(v.scripts[+b.dataset.copy]); const done=()=>toast('Guion copiado'); try{ navigator.clipboard.writeText(txt).then(done,()=>selectText(b)); }catch(e){ selectText(b); } });
+  }
+}
+function scriptText(s){ return s.lines.map(l=>typeof l==='string'?l:l.t).join(' '); }
+function selectText(btn){ const p=btn.closest('.script').querySelector('p'); const r=document.createRange(); r.selectNodeContents(p); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast('Texto seleccionado: cópialo con el menú'); }
+
+/* ================= voices ================= */
+let voices=[];
+function loadVoices(){
+  try{ voices=speechSynthesis.getVoices().filter(v=>/^es/i.test(v.lang)); }catch(e){ voices=[]; }
+  voices.sort((a,b)=>(b.lang==='es-ES')-(a.lang==='es-ES'));
+  const s=$('#voiceSel'); s.innerHTML = voices.length ? voices.map(v=>`<option value="${v.name}" ${v.name===voiceName?'selected':''}>${v.name} (${v.lang})</option>`).join('') : '<option>Voz por defecto</option>';
+}
+function pickVoice(){ return voices.find(v=>v.name===voiceName) || voices[0] || null; }
+function speakOne(text,p,r,token){
+  return new Promise(res=>{
+    if(!('speechSynthesis' in window) || token.cancel) return res();
+    const u=new SpeechSynthesisUtterance(text); u.lang='es-ES'; const v=pickVoice(); if(v) u.voice=v;
+    u.pitch=p; u.rate=r; u.volume=1;
+    const safety=setTimeout(res, text.length*110+4000);
+    u.onend=u.onerror=()=>{clearTimeout(safety);res();};
+    speechSynthesis.speak(u);
+  });
+}
+
+/* ================= audio engine ================= */
+let ctx=null, ringEl=null, ringUrl=null, hum=null;
+async function buildRingtone(){
+  try{
+    const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext; const sr=44100, dur=3.4;
+    const oc=new OAC(1,Math.round(sr*dur),sr);
+    // original marimba-style pattern, repeated twice per loop
+    const seq=[[0,659.25],[.15,830.61],[.3,987.77],[.45,1318.5],[.75,987.77],[.9,1318.5],[1.6,659.25],[1.75,830.61],[1.9,987.77],[2.05,1318.5],[2.35,1244.5],[2.5,987.77]];
+    seq.forEach(([t,f])=>{ [[1,.5],[4,.08]].forEach(([m,g])=>{ const o=oc.createOscillator(), a=oc.createGain(); o.type='sine'; o.frequency.value=f*m; a.gain.setValueAtTime(0,t); a.gain.linearRampToValueAtTime(g,t+.006); a.gain.exponentialRampToValueAtTime(.0001,t+(m>1?.12:.45)); o.connect(a).connect(oc.destination); o.start(t); o.stop(t+.5); }); });
+    const buf=await oc.startRendering();
+    ringUrl=URL.createObjectURL(toWav(buf.getChannelData(0),sr));
+  }catch(e){ ringUrl=null; }
+}
+function toWav(data,sr){
+  const n=data.length, b=new ArrayBuffer(44+n*2), v=new DataView(b); const w=(o,s)=>[...s].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));
+  w(0,'RIFF'); v.setUint32(4,36+n*2,true); w(8,'WAVE'); w(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true); v.setUint32(24,sr,true); v.setUint32(28,sr*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,'data'); v.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++){ const s=Math.max(-1,Math.min(1,data[i]*1.6)); v.setInt16(44+i*2,s*0x7fff,true); }
+  return new Blob([b],{type:'audio/wav'});
+}
+function unlockAudio(){
+  try{ if(navigator.audioSession) navigator.audioSession.type='playback'; }catch(e){}
+  try{ ctx = ctx || new (window.AudioContext||window.webkitAudioContext)(); ctx.resume(); const s=ctx.createBufferSource(); s.buffer=ctx.createBuffer(1,1,22050); s.connect(ctx.destination); s.start(0); }catch(e){}
+  if(ringUrl){ ringEl = ringEl || new Audio(ringUrl); ringEl.loop=true; ringEl.muted=true; const p=ringEl.play(); if(p) p.then(()=>{ringEl.pause();ringEl.currentTime=0;ringEl.muted=false;}).catch(()=>{ringEl.muted=false;}); }
+  clipEl = clipEl || new Audio();
+  try{ const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u); }catch(e){}
+}
+function startRing(){ if(ringEl){ ringEl.muted=false; ringEl.currentTime=0; ringEl.play().catch(()=>{}); } }
+function stopRing(){ if(ringEl){ ringEl.pause(); ringEl.currentTime=0; } }
+function tone(freq,start,len,gain=.12){ if(!ctx) return; const o=ctx.createOscillator(), g=ctx.createGain(); o.frequency.value=freq; g.gain.setValueAtTime(0,ctx.currentTime+start); g.gain.linearRampToValueAtTime(gain,ctx.currentTime+start+.01); g.gain.setValueAtTime(gain,ctx.currentTime+start+len-.02); g.gain.linearRampToValueAtTime(0,ctx.currentTime+start+len); o.connect(g).connect(ctx.destination); o.start(ctx.currentTime+start); o.stop(ctx.currentTime+start+len+.05); }
+function startHum(){
+  if(!ctx) return; try{
+    const len=ctx.sampleRate*2, b=ctx.createBuffer(1,len,ctx.sampleRate), d=b.getChannelData(0); for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+    const src=ctx.createBufferSource(); src.buffer=b; src.loop=true; const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=500; const g=ctx.createGain(); g.gain.value=.025;
+    const o=ctx.createOscillator(); o.frequency.value=55; const og=ctx.createGain(); og.gain.value=.018;
+    src.connect(f).connect(g).connect(ctx.destination); o.connect(og).connect(ctx.destination); src.start(); o.start(); hum={src,o};
+  }catch(e){}
+}
+function stopHum(){ if(hum){ try{hum.src.stop();hum.o.stop();}catch(e){} hum=null; } }
+async function wake(){ try{ wakeLock = await navigator.wakeLock.request('screen'); }catch(e){} }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && $('#panel').hidden) wake(); });
+
+/* ================= screens ================= */
+function show(id){ ['panel','lock','incoming','incall'].forEach(x=>$('#'+x).hidden = x!==id); }
+function paintCaller(v){
+  document.querySelectorAll('[data-name]').forEach(e=>e.textContent=v.name);
+  const img=$('#posterImg'); img.src=picUrl(v); img.className=photoUrl[v.id]?'photo':'';
+  $('#poster').style.setProperty('--sky0',v.sky[0]);
+  document.querySelectorAll('[data-avatar]').forEach(e=>e.setAttribute('style',picStyle(v)));
+  document.querySelectorAll('.callbg').forEach(e=>e.style.setProperty('--grad',v.grad));
+  $('#missedPic').style.backgroundImage=`url("${picUrl(v)}")`;
+}
+function tickClock(){ const n=new Date(); $('#lTime').textContent=n.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}); $('#lDate').textContent=n.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}); }
+setInterval(tickClock,1000); tickClock();
+
+function pickVillain(){ return sel==='surprise' ? VILLAINS[Math.floor(Math.random()*VILLAINS.length)] : VILLAINS.find(v=>v.id===sel) || VILLAINS[0]; }
+function pickScript(v){ const k='ac.last.'+v.id, last=LS.get(k,-1); let i=Math.floor(Math.random()*v.scripts.length); if(v.scripts.length>1 && i===last) i=(i+1)%v.scripts.length; LS.set(k,i); return v.scripts[i]; }
+
+function arm(){
+  unlockAudio(); wake();
+  current=pickVillain(); calledBack=false; $('#missed').hidden=true;
+  paintCaller(current); // preload the portrait so it is ready the instant it rings
+  show('lock');
+  const cap=$('#hotcap'); cap.textContent=`Sonará en ${delay<60?delay+' s':delay/60+' min'}. Mantén pulsada esta esquina para salir.`; cap.style.opacity=1; later(()=>cap.style.opacity=0,3500);
+  later(ring, delay*1000);
+}
+function ring(){
+  paintCaller(current); show('incoming'); startRing();
+  later(missed, 40000);
+}
+function missed(){ stopRing(); clearTimers(); $('#missedName').textContent=current.name; $('#missed').hidden=false; show('lock'); }
+function decline(){
+  stopRing(); clearTimers(); show('lock');
+  if(!calledBack){ calledBack=true; later(ring, 7000); }
+  else { $('#missedName').textContent=current.name; $('#missed').hidden=false; }
+}
+async function accept(){
+  stopRing(); clearTimers();
+  try{ ctx && ctx.resume(); }catch(e){}
+  show('incall'); tone(1400,0,.05,.08);
+  const t0=Date.now(); const st=$('#cStatus'); st.textContent='00:00';
+  const iv=setInterval(()=>{ const s=Math.floor((Date.now()-t0)/1000); st.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); },500);
+  timers.push(iv);
+  startHum();
+  const token={cancel:false}; callToken=token;
+  await sleep(900);
+  const clips=(await DB.get('audio:'+current.id))||[];
+  if(clips.length){
+    const c=clips[Math.floor(Math.random()*clips.length)];
+    clipEl = clipEl || new Audio(); clipEl.src=URL.createObjectURL(c.blob);
+    await new Promise(res=>{ clipEl.onended=clipEl.onerror=res; clipEl.play().catch(res); });
+  } else {
+    const s=pickScript(current);
+    for(const line of s.lines){ if(token.cancel) return; const o=typeof line==='string'?{t:line}:line; await speakOne(o.t, o.p??current.voice.p, o.r??current.voice.r, token); await sleep(420); }
+  }
+  if(!token.cancel) hangup(true);
+}
+function hangup(byCaller){
+  if(callToken) callToken.cancel=true;
+  try{ speechSynthesis.cancel(); }catch(e){}
+  if(clipEl){ clipEl.pause(); }
+  stopHum(); clearTimers();
+  if(byCaller){ [0,.45,.9].forEach(t=>tone(425,t,.25,.1)); }
+  $('#cStatus').textContent='Llamada finalizada';
+  later(()=>show('lock'), 1800);
+}
+function exitToPanel(){
+  if(callToken) callToken.cancel=true;
+  try{ speechSynthesis.cancel(); }catch(e){}
+  stopRing(); stopHum(); clearTimers(); if(clipEl) clipEl.pause();
+  try{ wakeLock && wakeLock.release(); }catch(e){} wakeLock=null;
+  show('panel');
+}
+
+/* hidden exit: long-press top-left corner */
+document.querySelectorAll('.hot').forEach(h=>{
+  let t=null;
+  h.addEventListener('pointerdown',()=>{ t=setTimeout(exitToPanel,1000); });
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>h.addEventListener(ev,()=>clearTimeout(t)));
+});
+document.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>b.setAttribute('aria-pressed', b.getAttribute('aria-pressed')!=='true'));
+
+$('#arm').onclick=arm; $('#accept').onclick=accept; $('#decline').onclick=decline; $('#hangup').onclick=()=>hangup(false);
+$('#voiceSel').onchange=e=>{ voiceName=e.target.value; LS.set('ac.voice',voiceName); };
+$('#testVoice').onclick=()=>{ const v=pickVillain(); try{speechSynthesis.cancel();}catch(e){} speakOne('Hola, niñas. Soy '+v.name+'.', v.voice.p, v.voice.r, {cancel:false}); };
+
+/* boot */
+(async()=>{
+  renderDelays(); renderGrid(); loadVoices();
+  try{ speechSynthesis.onvoiceschanged=loadVoices; }catch(e){}
+  buildRingtone();
+  for(const v of VILLAINS){ const p=await DB.get('photo:'+v.id); if(p) photoUrl[v.id]=URL.createObjectURL(p); }
+  renderGrid(); renderDossiers();
+})();
+</script>
+</body>
+</html>
