@@ -190,7 +190,9 @@ select{background:#1a1f2b;border:1px solid var(--line);border-radius:8px;padding
   <section class="step">
     <h2>Expedientes: voces y fotos</h2>
     <p class="hint">Cada villano trae su retrato al estilo de la serie animada. Si prefieres una imagen tuya (por ejemplo, una captura de la serie), súbela en su expediente y la verá la llamada. Sin audios propios, el villano habla con la voz del iPhone; para la voz buena, copia un guion, genéralo en ElevenLabs y sube el MP3.</p>
-    <div class="row"><span class="lab">Voz del iPhone</span><select id="voiceSel" aria-label="Voz del iPhone"></select><button class="btn small" id="testVoice">Probar</button></div>
+    <div class="row"><span class="lab">Voz de villano</span><select id="voiceSelM" aria-label="Voz para villanos"></select></div>
+    <div class="row"><span class="lab">Voz de villana</span><select id="voiceSelF" aria-label="Voz para villanas"></select><button class="btn small" id="testVoice">Probar</button></div>
+    <p class="hint" id="voiceHint" hidden>Este iPhone no tiene voces masculinas en español. Instala una gratis en Ajustes → Accesibilidad → Contenido leído → Voces → Español (España) → Jorge (o Jorge Mejorada).</p>
     <div id="dossiers" style="display:flex;flex-direction:column;gap:10px"></div>
   </section>
 </main>
@@ -407,7 +409,7 @@ function artUrl(v){ return artCache[v.id] || (artCache[v.id] = 'data:image/svg+x
 const VILLAINS = [
  {id:'joker', name:'Joker', cell:'Celda A-01', color:'#3fa34d', sky:['#4a1a66','#14081c'],
   tag:'El payaso bromista', bio:'Pelo verde, sonrisa enorme y traje morado. Siempre se está riendo.', fear:'Que las niñas hagan caso a papá: se le rompen las bromas.',
-  grad:'radial-gradient(60% 50% at 30% 30%,#6b2fa3,transparent),radial-gradient(60% 50% at 75% 75%,#1e8a45,transparent),#120a1c', voice:{p:1.55,r:1.08}, scripts:[
+  grad:'radial-gradient(60% 50% at 30% 30%,#6b2fa3,transparent),radial-gradient(60% 50% at 75% 75%,#1e8a45,transparent),#120a1c', voice:{g:'m',p:1.15,r:1.06}, scripts:[
   {title:'La broma pegajosa', lines:[
    'Ja, ja, ja, ja, ja... ¿Hola? ¿Hola? ¿Son las niñas? ¡Qué suerte!',
    'Soy yo... el Joker. Os llamo desde un escondite secreto de Gotham.',
@@ -435,7 +437,7 @@ const VILLAINS = [
  ]},
  {id:'penguin', name:'Pingüino', cell:'Celda B-07', color:'#8fa6c9', sky:['#34465f','#0b111c'],
   tag:'El caballero del paraguas', bio:'Sombrero de copa, monóculo y nariz de pico. Vive bajo el hielo con sus pingüinos.', fear:'Las niñas que se comen la cena se hacen fuertes como Batman.',
-  grad:'radial-gradient(60% 50% at 30% 25%,#3a4a6b,transparent),radial-gradient(50% 40% at 70% 80%,#7a1f2b,transparent),#0b0e16', voice:{p:0.7,r:0.9}, scripts:[
+  grad:'radial-gradient(60% 50% at 30% 25%,#3a4a6b,transparent),radial-gradient(50% 40% at 70% 80%,#7a1f2b,transparent),#0b0e16', voice:{g:'m',p:0.8,r:0.92}, scripts:[
   {title:'Mis pingüinos vigilan', lines:[
    'Cuac, cuac... ¿Diga? Aquí el Pingüino. Os llamo desde mi guarida, debajo del hielo.',
    'Mis pingüinos me han contado que en esta casa viven unas niñas muy especiales.',
@@ -454,27 +456,27 @@ const VILLAINS = [
  {id:'twoface', name:'Dos Caras', cell:'Celda C-02', color:'#e8c14a', sky:['#2a4d8a','#0b1426'],
   backdrop:'<path d="M100 0H200V200H100Z" fill="#8a1c1c"/><path d="M100 0H200V200H100Z" fill="#000" opacity=".15"/>',
   tag:'El de la moneda', bio:'Media cara buena y media cara mala. Lo decide todo lanzando una moneda.', fear:'Si las niñas hacen caso a papá, la moneda siempre sale cara.',
-  grad:'linear-gradient(90deg,#3b4252 0%,#3b4252 49%,#5a1c1c 51%,#5a1c1c 100%)', voice:{p:1,r:0.95}, scripts:[
+  grad:'linear-gradient(90deg,#3b4252 0%,#3b4252 49%,#5a1c1c 51%,#5a1c1c 100%)', voice:{g:'m',p:1,r:0.95}, scripts:[
   {title:'La moneda', lines:[
-   {t:'Hola, niñas. Soy Dos Caras.',p:1.1},
-   {t:'¡Y yo también! ¡Ja!',p:0.45,r:0.85},
-   {t:'Tengo una moneda. Si sale cara, os dejo en paz.',p:1.1},
-   {t:'Y si sale cruz... ¡hago una travesura gigante en vuestra casa!',p:0.45,r:0.85},
-   {t:'Voy a lanzarla... tres... dos...',p:1.1},
-   {t:'¡Espera! La moneda tiene una regla.',p:0.45,r:0.85},
-   {t:'Si las niñas hacen caso a papá, siempre sale cara.',p:1.1},
-   {t:'Grrr... Pues vamos a ver qué hacéis. ¡Estamos mirando!',p:0.45,r:0.85}]},
+   {t:'Hola, niñas. Soy Dos Caras.',p:1.05},
+   {t:'¡Y yo también! ¡Ja!',p:0.65,r:0.88},
+   {t:'Tengo una moneda. Si sale cara, os dejo en paz.',p:1.05},
+   {t:'Y si sale cruz... ¡hago una travesura gigante en vuestra casa!',p:0.65,r:0.88},
+   {t:'Voy a lanzarla... tres... dos...',p:1.05},
+   {t:'¡Espera! La moneda tiene una regla.',p:0.65,r:0.88},
+   {t:'Si las niñas hacen caso a papá, siempre sale cara.',p:1.05},
+   {t:'Grrr... Pues vamos a ver qué hacéis. ¡Estamos mirando!',p:0.65,r:0.88}]},
   {title:'Las dos voces', lines:[
-   {t:'¿Me oís? Soy la voz buena de Dos Caras.',p:1.15},
-   {t:'¡Y yo soy la voz mala! ¡No escuchéis a papá!',p:0.45,r:0.85},
-   {t:'Sí, sí, escuchad a papá. Es lo más valiente.',p:1.15},
-   {t:'¡No! ¡Haced travesuras!',p:0.45,r:0.85},
-   {t:'Niñas, vosotras decidís. ¿Vais a escuchar a papá?',p:1.15},
-   {t:'... ¿Sí? ¡Noooo! ¡Ha ganado la voz buena! ¡Me voy!',p:0.45,r:0.85}]}
+   {t:'¿Me oís? Soy la voz buena de Dos Caras.',p:1.05},
+   {t:'¡Y yo soy la voz mala! ¡No escuchéis a papá!',p:0.65,r:0.88},
+   {t:'Sí, sí, escuchad a papá. Es lo más valiente.',p:1.05},
+   {t:'¡No! ¡Haced travesuras!',p:0.65,r:0.88},
+   {t:'Niñas, vosotras decidís. ¿Vais a escuchar a papá?',p:1.05},
+   {t:'... ¿Sí? ¡Noooo! ¡Ha ganado la voz buena! ¡Me voy!',p:0.65,r:0.88}]}
  ]},
  {id:'ivy', name:'Hiedra Venenosa', cell:'Celda D-04', color:'#c0362c', sky:['#1d5a34','#06150c'],
   tag:'La reina de las plantas', bio:'Pelo rojo, ojos verdes y un vestido de hojas. Sus enredaderas trepan por las paredes.', fear:'Sus plantas se secan cerca de niñas que escuchan a papá.',
-  grad:'radial-gradient(60% 50% at 25% 30%,#1f6b3a,transparent),radial-gradient(50% 45% at 75% 75%,#8a2a2a,transparent),#07130b', voice:{p:1.25,r:0.82}, scripts:[
+  grad:'radial-gradient(60% 50% at 25% 30%,#1f6b3a,transparent),radial-gradient(50% 45% at 75% 75%,#8a2a2a,transparent),#07130b', voice:{g:'f',p:1.05,r:0.85}, scripts:[
   {title:'Las enredaderas', lines:[
    'Hola, pequeñas... Soy Hiedra Venenosa.',
    'Mis plantas están creciendo por toda la ciudad. Despacio... muy despacio...',
@@ -494,7 +496,7 @@ const VILLAINS = [
  {id:'riddler', name:'Acertijo', cell:'Celda E-11', color:'#9b5fd6', sky:['#13403a','#051512'],
   backdrop:'<g font-family="Georgia,serif" font-weight="bold" fill="#3fd06a" opacity=".22"><text x="18" y="60" font-size="44">?</text><text x="160" y="50" font-size="34">?</text><text x="150" y="128" font-size="52">?</text><text x="10" y="140" font-size="30">?</text></g>',
   tag:'El de los acertijos', bio:'Traje verde, bombín y antifaz morado. Lo llena todo de signos de interrogación.', fear:'Que las niñas acierten sus preguntas: siempre la respuesta es “papá”.',
-  grad:'radial-gradient(60% 50% at 30% 30%,#2d7a2d,transparent),radial-gradient(50% 45% at 75% 75%,#3b2a6b,transparent),#0a120a', voice:{p:1.15,r:1.12}, scripts:[
+  grad:'radial-gradient(60% 50% at 30% 30%,#2d7a2d,transparent),radial-gradient(50% 45% at 75% 75%,#3b2a6b,transparent),#0a120a', voice:{g:'m',p:1.1,r:1.1}, scripts:[
   {title:'Tres acertijos', lines:[
    'Atención, atención. Aquí Acertijo. Nadie resuelve mis acertijos. ¡Nadie!',
    'Primer acertijo. Es grande, da abrazos enormes y os lee cuentos. ¿Quién es?',
@@ -513,7 +515,7 @@ const VILLAINS = [
  ]},
  {id:'freeze', name:'Mr. Frío', cell:'Celda F-00', color:'#7fd3ff', sky:['#245f86','#061827'],
   tag:'El hombre de hielo', bio:'Cabeza dentro de una cúpula de cristal y gafas rojas. Todo lo que toca se congela.', fear:'El calor de una familia que se escucha derrite su hielo.',
-  grad:'radial-gradient(60% 50% at 30% 30%,#2a6f9a,transparent),radial-gradient(50% 45% at 70% 80%,#a9dcf2,transparent),#06121b', voice:{p:0.4,r:0.75}, scripts:[
+  grad:'radial-gradient(60% 50% at 30% 30%,#2a6f9a,transparent),radial-gradient(50% 45% at 70% 80%,#a9dcf2,transparent),#06121b', voice:{g:'m',p:0.6,r:0.8}, scripts:[
   {title:'El rayo congelador', lines:[
    'Hace... frío... ¿lo notáis? Soy Mister Frío.',
    'Quiero congelar Gotham entera. Las calles, los parques...',
@@ -547,8 +549,8 @@ const DB = {
 const $ = s=>document.querySelector(s);
 let sel = LS.get('ac.sel','joker');
 let delay = LS.get('ac.delay',20);
-let voiceName = LS.get('ac.voice','');
 const photoUrl = {};
+let BUNDLED = {}; // villanoId -> [{script, file}] generado por tools/generate-voices.mjs
 let current=null, calledBack=false, timers=[], callToken=null, wakeLock=null, clipEl=null;
 
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast.h); toast.h=setTimeout(()=>t.hidden=true,2600); }
@@ -581,7 +583,7 @@ async function renderDossiers(){
   for(const v of VILLAINS){
     const clips=(await DB.get('audio:'+v.id))||[];
     const d=document.createElement('details'); d.className='dossier'; d.dataset.id=v.id; d.style.setProperty('--vc',v.color); if(open.has(v.id)) d.open=true;
-    d.innerHTML=`<summary><div class="mono" style='${picStyle(v)}'></div><span class="who2"><span class="nm">${v.name}</span><span class="tag">${v.tag}</span></span><span class="meta">${clips.length?clips.length+' audio'+(clips.length>1?'s':''):'voz del iPhone'}</span></summary>
+    d.innerHTML=`<summary><div class="mono" style='${picStyle(v)}'></div><span class="who2"><span class="nm">${v.name}</span><span class="tag">${v.tag}</span></span><span class="meta">${clips.length?clips.length+' audio'+(clips.length>1?'s':''):(BUNDLED[v.id]||[]).length?'voz grabada':'voz del iPhone'}</span></summary>
     <div class="dbody">
       <div class="file-card"><div class="big" style='${picStyle(v)}'></div>
         <dl><div><dt>${v.cell}</dt><dd>${v.bio}</dd></div><div><dt>Le da miedo</dt><dd>${v.fear}</dd></div></dl></div>
@@ -607,16 +609,31 @@ function selectText(btn){ const p=btn.closest('.script').querySelector('p'); con
 
 /* ================= voices ================= */
 let voices=[];
+let voicePref = LS.get('ac.voices',{m:'',f:''});
+// iOS/macOS Spanish voices are named, not labelled by gender: classify by name.
+const MALE=/jorge|juan|diego|carlos|pablo|enrique|álvaro|alvaro|eddy|reed|rocko|grandpa|abuelo|jordi|andrés|andres|miguel|tomás|tomas|google español de estados/i;
+const FEMALE=/m[oó]nica|paulina|marisol|angélica|angelica|sandy|shelley|flo|grandma|abuela|isabela|soledad|francisca|helena|laura|elvira|sabina|google español$/i;
+function genderOf(v){ return MALE.test(v.name)?'m':FEMALE.test(v.name)?'f':'?'; }
+function quality(v){ return (/premium/i.test(v.name)?4:/mejorad|enhanced/i.test(v.name)?3:0) + (v.lang==='es-ES'?2:0) + (v.localService?1:0); }
 function loadVoices(){
   try{ voices=speechSynthesis.getVoices().filter(v=>/^es/i.test(v.lang)); }catch(e){ voices=[]; }
-  voices.sort((a,b)=>(b.lang==='es-ES')-(a.lang==='es-ES'));
-  const s=$('#voiceSel'); s.innerHTML = voices.length ? voices.map(v=>`<option value="${v.name}" ${v.name===voiceName?'selected':''}>${v.name} (${v.lang})</option>`).join('') : '<option>Voz por defecto</option>';
+  voices.sort((a,b)=>quality(b)-quality(a));
+  for(const g of ['m','f']){
+    const s=$(g==='m'?'#voiceSelM':'#voiceSelF');
+    const list=[...voices.filter(v=>genderOf(v)===g),...voices.filter(v=>genderOf(v)==='?'),...voices.filter(v=>genderOf(v)!==g&&genderOf(v)!=='?')];
+    const def=pickVoice(g);
+    s.innerHTML = list.length ? list.map(v=>`<option value="${v.name}" ${def&&v.name===def.name?'selected':''}>${v.name} (${v.lang})</option>`).join('') : '<option>Voz por defecto</option>';
+  }
+  $('#voiceHint').hidden = !voices.length || voices.some(v=>genderOf(v)==='m');
 }
-function pickVoice(){ return voices.find(v=>v.name===voiceName) || voices[0] || null; }
-function speakOne(text,p,r,token){
+function pickVoice(g='m'){
+  return voices.find(v=>v.name===voicePref[g]) || voices.find(v=>genderOf(v)===g) || voices.find(v=>genderOf(v)==='?') || voices[0] || null;
+}
+function speakOne(text,p,r,token,g){
   return new Promise(res=>{
     if(!('speechSynthesis' in window) || token.cancel) return res();
-    const u=new SpeechSynthesisUtterance(text); u.lang='es-ES'; const v=pickVoice(); if(v) u.voice=v;
+    const u=new SpeechSynthesisUtterance(text); u.lang='es-ES'; const v=pickVoice(g); if(v) u.voice=v;
+    if(g==='m' && v && genderOf(v)!=='m') p=Math.min(p,.75)*.8;
     u.pitch=p; u.rate=r; u.volume=1;
     const safety=setTimeout(res, text.length*110+4000);
     u.onend=u.onerror=()=>{clearTimeout(safety);res();};
@@ -679,7 +696,9 @@ function tickClock(){ const n=new Date(); $('#lTime').textContent=n.toLocaleTime
 setInterval(tickClock,1000); tickClock();
 
 function pickVillain(){ return sel==='surprise' ? VILLAINS[Math.floor(Math.random()*VILLAINS.length)] : VILLAINS.find(v=>v.id===sel) || VILLAINS[0]; }
-function pickScript(v){ const k='ac.last.'+v.id, last=LS.get(k,-1); let i=Math.floor(Math.random()*v.scripts.length); if(v.scripts.length>1 && i===last) i=(i+1)%v.scripts.length; LS.set(k,i); return v.scripts[i]; }
+function pickScriptIndex(v){ const k='ac.last.'+v.id, last=LS.get(k,-1); let i=Math.floor(Math.random()*v.scripts.length); if(v.scripts.length>1 && i===last) i=(i+1)%v.scripts.length; LS.set(k,i); return i; }
+async function loadBundled(){ try{ const r=await fetch('voices/index.json',{cache:'no-cache'}); if(r.ok) BUNDLED=await r.json(); }catch(e){} }
+function playFile(src){ clipEl = clipEl || new Audio(); clipEl.src=src; return new Promise(res=>{ clipEl.onended=clipEl.onerror=res; clipEl.play().catch(res); }); }
 
 function arm(){
   unlockAudio(); wake();
@@ -710,13 +729,14 @@ async function accept(){
   const token={cancel:false}; callToken=token;
   await sleep(900);
   const clips=(await DB.get('audio:'+current.id))||[];
+  const si=pickScriptIndex(current), rec=(BUNDLED[current.id]||[]).find(c=>c.script===si);
   if(clips.length){
-    const c=clips[Math.floor(Math.random()*clips.length)];
-    clipEl = clipEl || new Audio(); clipEl.src=URL.createObjectURL(c.blob);
-    await new Promise(res=>{ clipEl.onended=clipEl.onerror=res; clipEl.play().catch(res); });
+    // audios subidos por papá: mandan sobre todo lo demás
+    await playFile(URL.createObjectURL(clips[Math.floor(Math.random()*clips.length)].blob));
+  } else if(rec){
+    await playFile(rec.file);
   } else {
-    const s=pickScript(current);
-    for(const line of s.lines){ if(token.cancel) return; const o=typeof line==='string'?{t:line}:line; await speakOne(o.t, o.p??current.voice.p, o.r??current.voice.r, token); await sleep(420); }
+    for(const line of current.scripts[si].lines){ if(token.cancel) return; const o=typeof line==='string'?{t:line}:line; await speakOne(o.t, o.p??current.voice.p, o.r??current.voice.r, token, current.voice.g); await sleep(420); }
   }
   if(!token.cancel) hangup(true);
 }
@@ -746,14 +766,16 @@ document.querySelectorAll('.hot').forEach(h=>{
 document.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>b.setAttribute('aria-pressed', b.getAttribute('aria-pressed')!=='true'));
 
 $('#arm').onclick=arm; $('#accept').onclick=accept; $('#decline').onclick=decline; $('#hangup').onclick=()=>hangup(false);
-$('#voiceSel').onchange=e=>{ voiceName=e.target.value; LS.set('ac.voice',voiceName); };
-$('#testVoice').onclick=()=>{ const v=pickVillain(); try{speechSynthesis.cancel();}catch(e){} speakOne('Hola, niñas. Soy '+v.name+'.', v.voice.p, v.voice.r, {cancel:false}); };
+$('#voiceSelM').onchange=e=>{ voicePref.m=e.target.value; LS.set('ac.voices',voicePref); };
+$('#voiceSelF').onchange=e=>{ voicePref.f=e.target.value; LS.set('ac.voices',voicePref); };
+$('#testVoice').onclick=()=>{ const v=pickVillain(); try{speechSynthesis.cancel();}catch(e){} speakOne('Hola, niñas. Soy '+v.name+'.', v.voice.p, v.voice.r, {cancel:false}, v.voice.g); };
 
 /* boot */
 (async()=>{
   renderDelays(); renderGrid(); loadVoices();
   try{ speechSynthesis.onvoiceschanged=loadVoices; }catch(e){}
   buildRingtone();
+  await loadBundled();
   for(const v of VILLAINS){ const p=await DB.get('photo:'+v.id); if(p) photoUrl[v.id]=URL.createObjectURL(p); }
   renderGrid(); renderDossiers();
 })();

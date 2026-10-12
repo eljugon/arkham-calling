@@ -1,0 +1,35 @@
+{
+  "_doc": "Voz y efecto de cada villano. 'eleven' = ElevenLabs (voice_id de tu biblioteca), 'edge' = voces neuronales de Microsoft (gratis). 'fx' = cadena de filtros de ffmpeg aplicada después. Dos Caras tiene una voz para su cara buena y otra para la mala.",
+  "joker": {
+    "eleven": {"voice_id": "", "stability": 0.25, "style": 0.8},
+    "edge":   {"voice": "es-ES-AlvaroNeural", "pitch": "+14Hz", "rate": "+10%"},
+    "fx": "aecho=0.8:0.5:25:0.15"
+  },
+  "penguin": {
+    "eleven": {"voice_id": "", "stability": 0.35, "style": 0.6},
+    "edge":   {"voice": "es-ES-AlvaroNeural", "pitch": "-6Hz", "rate": "-6%"},
+    "fx": "equalizer=f=1400:t=q:w=1.2:g=7,highpass=f=350"
+  },
+  "twoface": {
+    "eleven": {"voice_id": "", "stability": 0.5, "style": 0.3},
+    "eleven_bad": {"voice_id": "", "stability": 0.2, "style": 0.9},
+    "edge":     {"voice": "es-ES-AlvaroNeural", "pitch": "+0Hz", "rate": "-4%"},
+    "edge_bad": {"voice": "es-ES-AlvaroNeural", "pitch": "-22Hz", "rate": "-12%"},
+    "fx_bad": "asetrate=24000*0.88,aresample=24000,atempo=1.136,acrusher=bits=10:mix=0.25"
+  },
+  "ivy": {
+    "eleven": {"voice_id": "", "stability": 0.45, "style": 0.6},
+    "edge":   {"voice": "es-ES-ElviraNeural", "pitch": "-4Hz", "rate": "-14%"},
+    "fx": "aecho=0.8:0.6:60:0.25"
+  },
+  "riddler": {
+    "eleven": {"voice_id": "", "stability": 0.35, "style": 0.7},
+    "edge":   {"voice": "es-ES-AlvaroNeural", "pitch": "+8Hz", "rate": "+12%"},
+    "fx": ""
+  },
+  "freeze": {
+    "eleven": {"voice_id": "", "stability": 0.6, "style": 0.2},
+    "edge":   {"voice": "es-ES-AlvaroNeural", "pitch": "-18Hz", "rate": "-22%"},
+    "fx": "asetrate=24000*0.92,aresample=24000,atempo=1.087,aecho=0.8:0.7:45|90:0.35|0.2,chorus=0.6:0.9:40:0.3:0.25:2"
+  }
+}
